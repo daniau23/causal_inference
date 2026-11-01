@@ -150,3 +150,5 @@ causal_inference/
 ## A note on the data
 
 The dataset is **synthetic** and generated inside the notebooks, so results are reproducible with a fixed seed. The data generator plants a known causal effect, which makes it a safe sandbox for checking whether each learner recovers the right direction and rough magnitude. Real-world observational work would also need careful study design, overlap checks, and sensitivity analysis for unmeasured confounding.
+
+*NB:* Commit message with "new images" was the wrong name for the Cross-fitting implementation.
