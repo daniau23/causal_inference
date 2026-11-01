@@ -31,10 +31,10 @@ The average difference between those two predictions is the **Average Treatment 
 
 | Notebook | Approach | What it does |
 | --- | --- | --- |
-| [`s_learner.ipynb`](s_learner.ipynb) | **S-learner** | Trains **one** Random Forest with the treatment as an extra feature, then predicts twice. |
-| [`t_learner.ipynb`](t_learner.ipynb) | **T-learner** | Trains **two** separate Random Forests, one for the control group and one for the treated group. |
-| [`cross_fitting_s_learner.ipynb`](cross_fitting_s_learner.ipynb) | **Cross-fitted S-learner** | Runs 5-fold cross-fitting with one treatment-aware model per fold, then refits on the full training set. |
-| [`cross_fitting_t_learner.ipynb`](cross_fitting_t_learner.ipynb) | **Cross-fitted T-learner** | Runs 5-fold cross-fitting with separate treated/control models inside each fold, then refits both models. |
+| [`standard_approach/s_learner.ipynb`](standard_approach/s_learner.ipynb) | **S-learner** | Trains **one** Random Forest with the treatment as an extra feature, then predicts twice. |
+| [`standard_approach/t_learner.ipynb`](standard_approach/t_learner.ipynb) | **T-learner** | Trains **two** separate Random Forests, one for the control group and one for the treated group. |
+| [`cross_fitting/cross_fitting_s_learner.ipynb`](cross_fitting/cross_fitting_s_learner.ipynb) | **Cross-fitted S-learner** | Runs 5-fold cross-fitting with one treatment-aware model per fold, then refits on the full training set. |
+| [`cross_fitting/cross_fitting_t_learner.ipynb`](cross_fitting/cross_fitting_t_learner.ipynb) | **Cross-fitted T-learner** | Runs 5-fold cross-fitting with separate treated/control models inside each fold, then refits both models. |
 
 The two standard notebooks follow the same structure:
 
@@ -123,7 +123,7 @@ The notebooks are self-contained and use only common Python data-science librari
 pip install numpy pandas scikit-learn matplotlib
 ```
 
-Then open any notebook and run the cells top to bottom. The standard `s_learner.ipynb` and `t_learner.ipynb` notebooks use grid search, so they take a few minutes on a typical laptop. The cross-fitting notebooks use fixed Random Forest settings (`max_depth=10`, 150–250 trees) instead of grid search and run faster.
+Then open any notebook and run the cells top to bottom. The standard notebooks in `standard_approach/` (`s_learner.ipynb` and `t_learner.ipynb`) use grid search, so they take a few minutes on a typical laptop. The cross-fitting notebooks in `cross_fitting/` use fixed Random Forest settings (`max_depth=10`, 150–250 trees) instead of grid search and run faster.
 
 ---
 
@@ -132,10 +132,14 @@ Then open any notebook and run the cells top to bottom. The standard `s_learner.
 ```
 causal_inference/
 ├── README.md
-├── s_learner.ipynb
-├── t_learner.ipynb
-├── cross_fitting_s_learner.ipynb
-├── cross_fitting_t_learner.ipynb
+├── LICENSE
+├── .gitignore
+├── standard_approach/
+│   ├── s_learner.ipynb
+│   └── t_learner.ipynb
+├── cross_fitting/
+│   ├── cross_fitting_s_learner.ipynb
+│   └── cross_fitting_t_learner.ipynb
 └── images/
     ├── s_vs_t_learner.png
     ├── workflow.png
@@ -150,5 +154,3 @@ causal_inference/
 ## A note on the data
 
 The dataset is **synthetic** and generated inside the notebooks, so results are reproducible with a fixed seed. The data generator plants a known causal effect, which makes it a safe sandbox for checking whether each learner recovers the right direction and rough magnitude. Real-world observational work would also need careful study design, overlap checks, and sensitivity analysis for unmeasured confounding.
-
-*NB:* Commit message with "new images" was the wrong name for the Cross-fitting implementation.
