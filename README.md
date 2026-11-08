@@ -4,7 +4,7 @@ In the absence of running an A/B test experiment, this small, hands-on repo show
 
 > **Does offering a $20 discount actually stop customers from churning?**
 
-Instead of just predicting churn, we estimate the **causal effect** of the discount by comparing what would happen if everyone got it versus if no one did. This is useful when an experiment is impractical, too slow, or simply was never run, and you have to work with data that already exists. The repo walks through two classic meta-learners, S-learner and T-learner, side by side on the same synthetic customer dataset, then shows how to make each one more reliable with **cross-fitting**.
+Instead of just predicting churn, we estimate the **causal effect** of the discount by comparing what would happen if everyone got it versus if no one did. This is useful when an experiment is impractical, too slow, or simply was never run, and you have to work with data that already exists. The repo walks through two classic meta-learners, S-learner and T-learner, side by side on the same synthetic customer dataset, then shows how to make each one more reliable with **cross-fitting** and how to evaluate who to target using the **Area Under the Uplift Curve (AUUC)**.
 
 ![S-learner vs T-learner](images/s_vs_t_learner.png)
 
@@ -35,6 +35,8 @@ The average difference between those two predictions is the **Average Treatment 
 | [`standard_approach/t_learner.ipynb`](standard_approach/t_learner.ipynb) | **T-learner** | Trains **two** separate Random Forests, one for the control group and one for the treated group. |
 | [`cross_fitting/cross_fitting_s_learner.ipynb`](cross_fitting/cross_fitting_s_learner.ipynb) | **Cross-fitted S-learner** | Runs 5-fold cross-fitting with one treatment-aware model per fold, then refits on the full training set. |
 | [`cross_fitting/cross_fitting_t_learner.ipynb`](cross_fitting/cross_fitting_t_learner.ipynb) | **Cross-fitted T-learner** | Runs 5-fold cross-fitting with separate treated/control models inside each fold, then refits both models. |
+| [`standard_approach/s_learner_auuc_metric_evaluation/`](standard_approach/s_learner_auuc_metric_evaluation/s_learner_auuc_metric_evaluation.ipynb) | **S-learner + AUUC** | Builds the S-learner uplift curve, computes AUUC/Qini metrics, and simulates top-20% targeting on new customers. |
+| [`standard_approach/t_learner_auuc_metric_evaluation/`](standard_approach/t_learner_auuc_metric_evaluation/t_learner_auuc_metric_evaluation.ipynb) | **T-learner + AUUC** | Builds the T-learner uplift curve, computes AUUC/Qini metrics, and simulates top-20% targeting on new customers. |
 
 The two standard notebooks follow the same structure:
 
@@ -71,6 +73,23 @@ Fitting a model and estimating each customer's effect on the same data can be to
 ![Cross-fitting](images/cross_fitting.png)
 
 In this repo, cross-fitting is implemented with `StratifiedKFold(n_splits=5, shuffle=True, random_state=50)`. For the cross-fitted S-learner, the notebook also reports out-of-fold predictive metrics so you can compare the validation and test performance directly. Cross-fitting does **not** remove confounding by itself — it improves how the models are evaluated. The causal assumptions below still apply.
+
+---
+
+## Uplift evaluation with AUUC
+
+ATE tells you the average effect, but it does not tell you *who* to target. The `*_auuc_metric_evaluation` notebooks score each test-set customer with an individual uplift score (control churn probability minus treated churn probability), sort customers from highest to lowest uplift, and track cumulative incremental retention. The area under that uplift (Qini) curve is the **AUUC**:
+
+- A higher AUUC means the model ranks persuadable customers ahead of "sure things" and "sleeping dogs".
+- A random-targeting diagonal is drawn for comparison; the model curve should sit above it.
+- The notebooks also simulate production inference on new, untreated customers and flag the top 20% (80th percentile) for targeting, skipping customers with negative predicted uplift.
+
+| Notebook | AUUC |
+| --- | --- |
+| S-learner | **0.068** |
+| T-learner | **0.053** |
+
+Both notebooks write their curve data to `*_auuc_metric_evaluation_results.csv` inside their respective folders.
 
 ---
 
@@ -123,7 +142,7 @@ The notebooks are self-contained and use only common Python data-science librari
 pip install numpy pandas scikit-learn matplotlib
 ```
 
-Then open any notebook and run the cells top to bottom. The standard notebooks in `standard_approach/` (`s_learner.ipynb` and `t_learner.ipynb`) use grid search, so they take a few minutes on a typical laptop. The cross-fitting notebooks in `cross_fitting/` use fixed Random Forest settings (`max_depth=10`, 150–250 trees) instead of grid search and run faster.
+Then open any notebook and run the cells top to bottom. The standard notebooks in `standard_approach/` (`s_learner.ipynb`, `t_learner.ipynb`, and the two `*_auuc_metric_evaluation` notebooks) use grid search, so they take a few minutes on a typical laptop. The cross-fitting notebooks in `cross_fitting/` use fixed Random Forest settings (`max_depth=10`, 150–250 trees) instead of grid search and run faster.
 
 ---
 
@@ -136,7 +155,13 @@ causal_inference/
 ├── .gitignore
 ├── standard_approach/
 │   ├── s_learner.ipynb
-│   └── t_learner.ipynb
+│   ├── t_learner.ipynb
+│   ├── s_learner_auuc_metric_evaluation/
+│   │   ├── s_learner_auuc_metric_evaluation.ipynb
+│   │   └── s_learner_auuc_metric_evaluation_results.csv
+│   └── t_learner_auuc_metric_evaluation/
+│       ├── t_learner_auuc_metric_evaluation.ipynb
+│       └── t_learner_auuc_metric_evaluation_results.csv
 ├── cross_fitting/
 │   ├── cross_fitting_s_learner.ipynb
 │   └── cross_fitting_t_learner.ipynb
